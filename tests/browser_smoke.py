@@ -70,7 +70,38 @@ try:
             assert len(report['warnings']) == 1
             assert report['warnings'][0]['reason'] == 'HTTP 404'
         page.screenshot(path=str(root / 'dist' / 'popup.png'))
+        sources = browser.new_page()
+        sources.add_init_script("""window.chrome = {
+          runtime: {},
+          devtools: {inspectedWindow: {getResources: callback => callback([
+            {url: 'https://cdn.example.test/dynamic.js', getContent: cb => cb('export default 42;', '')},
+            {url: 'https://fonts.example.test/font.woff', getContent: cb => cb('AP+A', 'base64')},
+            {url: 'https://frame.example.test/script.js?v=1', getContent: cb => cb('frame1', '')},
+            {url: 'https://frame.example.test/script.js?v=2', getContent: cb => cb('frame2', '')},
+            {url: 'https://cdn.example.test/unavailable.js', getContent: cb => cb(null, '')},
+            {url: 'chrome-extension://other/private.js', getContent: cb => cb('ignored', '')},
+            {url: 'https://cdn.example.test/bad.js', getContent: cb => cb('x', 'invalid')}
+          ])}},
+          downloads: {download: async ({url}) => {
+            const bytes = new Uint8Array(await (await fetch(url)).arrayBuffer());
+            let binary = ''; for (const byte of bytes) binary += String.fromCharCode(byte);
+            window.savedZip = btoa(binary); return 1;
+          }}
+        };""")
+        sources.goto(base + '/extension/sources.html')
+        sources.locator('#export').click()
+        sources.wait_for_function('window.savedZip', timeout=30000)
+        with zipfile.ZipFile(BytesIO(base64.b64decode(sources.evaluate('window.savedZip')))) as z:
+            assert z.testzip() is None
+            assert z.read('sources/cdn.example.test/0001/dynamic.js') == b'export default 42;'
+            assert z.read('sources/fonts.example.test/0002/font.woff') == bytes([0, 255, 128])
+            assert z.read('sources/frame.example.test/0003/script.js') == b'frame1'
+            assert z.read('sources/frame.example.test/0004/script.js') == b'frame2'
+            report = json.loads(z.read('sources-report.json'))
+            assert report['saved'] == 4 and report['skipped'] == 3
+            assert any('Unsupported encoding' in entry.get('reason', '') for entry in report['entries'])
         browser.close()
         print('PASS: browser capture, nested CSS, asset rewriting, missing-asset report, and ZIP contents')
+        print('PASS: DevTools export, multiple domains, binary fonts, query variants, and skipped-content report (mocked Chrome APIs)')
 finally:
     server.shutdown()

@@ -6,6 +6,21 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { makeZip, crc32 } from '../extension/zip.js';
 import { assetPath, rewriteCss, webUrl } from '../extension/resources.js';
+import { sourcePath, sourceBytes } from '../extension/source-files.js';
+
+test('DevTools paths group domains and safely distinguish query variants', () => {
+  assert.equal(sourcePath('https://cdn.example.com/js/app.js?v=1', 1), 'sources/cdn.example.com/0001/js/app.js');
+  assert.notEqual(sourcePath('https://cdn.example.com/js/app.js?v=1', 1), sourcePath('https://cdn.example.com/js/app.js?v=2', 2));
+  assert.equal(sourcePath('https://example.com/', 3), 'sources/example.com/0003/index.html');
+  assert.equal(sourcePath('chrome-extension://abc/script.js', 1), null);
+  assert.ok(!sourcePath('https://example.com/%2e%2e/thing', 1).split('/').includes('..'));
+});
+
+test('DevTools content decoding preserves binary bytes and Unicode', () => {
+  assert.deepEqual(sourceBytes('AP+A', 'base64'), new Uint8Array([0, 255, 128]));
+  assert.equal(new TextDecoder().decode(sourceBytes('hello 🌍', '')), 'hello 🌍');
+  assert.throws(() => sourceBytes('x', 'unsupported'));
+});
 
 test('ZIP can be read and CRC-verified by an independent implementation', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'source-saver-'));

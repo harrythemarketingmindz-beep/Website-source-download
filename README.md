@@ -13,6 +13,16 @@ The extension requests optional HTTP/HTTPS host access because styles, images, a
 
 ## What is saved
 
+### DevTools Sources export (v1.1)
+
+To export files like those listed in **DevTools → Sources**, open the website, open DevTools, and select the **Save Sources** panel (it may be under the `»` menu). Scroll and interact with the website to load the resources you want, then click **Download loaded sources**. If the panel is missing after installing/updating the extension, close and reopen DevTools.
+
+This uses Chrome's DevTools resource API to save content the browser exposes, including resources from other domains and frames, dynamically loaded scripts, and fonts. Files retain their original contents and are grouped by domain under `sources/`. `sources-report.json` maps original URLs to saved paths and lists skipped resources. No additional host permission or refetch is needed in this mode. It may contain authenticated/session-specific content already loaded by the browser; review before sharing.
+
+It cannot discover every public file on the server. Only currently exposed resources are included; virtual source-map entries and unavailable response bodies are not guaranteed. Load the page with DevTools open for best coverage. URLs/imports are not rewritten in this mode, so the export is for inspecting source files rather than offline playback. Limits: 400 files, 15 MB per file, 80 MB total; 12-second timeout per resource.
+
+### Popup page snapshot
+
 - A snapshot of the current rendered document, with local references to successfully downloaded assets.
 - Linked stylesheets, nested CSS URL references, scripts, displayed images, linked icons, fonts referenced in CSS, and directly referenced media within limits.
 - `capture-report.json` with errors, limits, and capture metadata.
