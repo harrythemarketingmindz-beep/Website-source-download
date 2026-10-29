@@ -1,0 +1,8 @@
+{
+  "name": "page-source-saver",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test", "build": "python3 scripts/package.py" },
+  "engines": { "node": ">=20" }
+}

@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Page Source Saver</title><link rel="stylesheet" href="popup.css"></head>
+<body>
+  <header><span class="mark">↓</span><span>PAGE SOURCE SAVER</span><span class="version">V1.0</span></header>
+  <main>
+    <p class="eyebrow">TAKE A COPY WITH YOU</p>
+    <h1>A website.<br>A little more local.</h1>
+    <p class="intro">Save this page’s HTML, styles, scripts, and images in one ZIP.</p>
+    <div class="page"><span class="dot"></span><span id="page-name">Reading current page…</span></div>
+    <div class="includes"><span>HTML</span><span>CSS</span><span>JS</span><span>IMAGES</span><span>FONTS</span></div>
+    <button id="save" disabled>Download page source <span>↗</span></button>
+    <p id="status" role="status" aria-live="polite">Ready when you are.</p>
+    <p class="note">Keep this popup open while saving. Downloads browser-accessible frontend files only. Some assets may be unavailable; backend code is never included.</p>
+  </main>
+  <footer>CURRENT PAGE ONLY <span>LOCAL BY DESIGN</span></footer>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

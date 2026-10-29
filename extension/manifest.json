@@ -1,0 +1,9 @@
+{
+  "manifest_version": 3,
+  "name": "Page Source Saver",
+  "version": "1.0.0",
+  "description": "Save a page's rendered HTML and accessible frontend assets as a ZIP archive.",
+  "permissions": ["activeTab", "scripting", "downloads"],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "action": { "default_popup": "popup.html", "default_title": "Save page source" }
+}
